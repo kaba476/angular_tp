@@ -1,0 +1,15 @@
+<nav class="navbar">
+  <a class="brand" routerLink="/">Todo App</a>
+  <div class="nav-links">
+    @if (auth.isAuthenticated()) {
+      <a routerLink="/tasks">Tâches</a>
+      <span class="user-name">{{ auth.currentUser()?.name }}</span>
+      <button class="btn btn-sm btn-outline" type="button" (click)="logout()">Déconnexion</button>
+    } @else {
+      <a routerLink="/login">Connexion</a>
+      <a routerLink="/register">Inscription</a>
+    }
+  </div>
+</nav>
+
+<router-outlet />

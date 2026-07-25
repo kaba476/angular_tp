@@ -1,0 +1,44 @@
+<div class="container">
+  <div class="task-card">
+    <h2>Mes tâches</h2>
+
+    <form class="task-form" (ngSubmit)="submit()">
+      <div class="task-form-row">
+        <input class="form-control" type="text" name="title" [(ngModel)]="form.title" placeholder="Nouvelle tâche" required />
+        <textarea class="form-control" name="description" [(ngModel)]="form.description" placeholder="Description (optionnelle)"></textarea>
+      </div>
+
+      <label class="checkbox">
+        <input type="checkbox" name="is_done" [(ngModel)]="form.is_done" />
+        Terminée
+      </label>
+
+      <div class="task-form-row">
+        <button class="btn btn-primary" type="submit">{{ editingId ? 'Modifier' : 'Ajouter' }}</button>
+        @if (editingId) {
+          <button class="btn btn-outline" type="button" (click)="reset()">Annuler</button>
+        }
+      </div>
+    </form>
+  </div>
+
+  <ul class="task-list">
+    @for (task of tasks(); track task.id) {
+      <li class="task-item" [class.done]="task.is_done">
+        <input type="checkbox" [checked]="task.is_done" (change)="toggle(task)" />
+        <div class="task-content">
+          <p class="task-title">{{ task.title }}</p>
+          @if (task.description) {
+            <p class="task-desc">{{ task.description }}</p>
+          }
+        </div>
+        <div class="task-actions">
+          <button class="btn btn-sm btn-outline" (click)="edit(task)">Modifier</button>
+          <button class="btn btn-sm btn-danger" (click)="remove(task.id)">Supprimer</button>
+        </div>
+      </li>
+    } @empty {
+      <li class="empty">Aucune tâche pour le moment.</li>
+    }
+  </ul>
+</div>
