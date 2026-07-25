@@ -21,11 +21,15 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8|confirmed',
             ]);
 
-            $user = User::create($validated);
-            Auth::login($user);
-            $request->session()->regenerate();
+            $validated['password'] = Hash::make($validated['password']);
 
-            return response()->json(['user' => $user], 201);
+            $user = User::create($validated);
+            $token = $user->createToken('auth-token')->plainTextToken;
+
+            return response()->json([
+                'user' => $user,
+                'token' => $token
+            ], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => "Erreur lors de l\'enregistrement: {$e->getMessage()}"
@@ -51,9 +55,13 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $request->session()->regenerate();
+            $user = Auth::user();
+            $token = $user->createToken('auth-token')->plainTextToken;
 
-            return response()->json(['user' => $request->user()]);
+            return response()->json([
+                'user' => $user,
+                'token' => $token
+            ]);
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => "Erreur lors de la connexion: {$e->getMessage()}"
@@ -68,10 +76,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            Auth::guard('web')->logout();
-
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            $request->user()->currentAccessToken()->delete();
 
             return response()->json([
                 'message' => 'Déconnexion réussie.'
@@ -86,7 +91,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         try {
-            return response()->json(['user' => $request->user()]);
+            return response()->json($request->user());
         } catch (Exception $e) {
             return response()->json([
                 'message' => "Une erreur s'est produite lors de la récupération des informations de l'utilisateur: {$e->getMessage()}"
